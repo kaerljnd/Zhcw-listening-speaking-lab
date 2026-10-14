@@ -105,6 +105,8 @@ function audioPanel(file, label) {
 
 function attachAudioTracking() {
   document.querySelectorAll('audio[data-audio-id]').forEach(audio => {
+    if (audio.dataset.trackingAttached === '1') return;
+    audio.dataset.trackingAttached = '1';
     audio.addEventListener('play', () => {
       const id = audio.dataset.audioId;
       state.plays[id] = (state.plays[id] || 0) + 1;
@@ -223,6 +225,7 @@ function renderExam() {
     body += `<div class="question-card"><div class="instruction"><strong>实际错题：</strong><span>${e.wrong.length ? e.wrong.map(i => `Q${i + 1}`).join('、') : '本次全对；仍需处理所有 C 类题和部分 B 类题。'}</span></div>${e.wrong.map(i => { const q = C.examQuestions[i]; return `<div class="field"><label>Q${i + 1} 重新选择（仍不显示正确答案）</label><select data-revision="${i}"><option value="">请选择</option>${q.options.map((o, j) => `<option value="${j}" ${Number(e.revision[i]) === j ? 'selected' : ''}>${String.fromCharCode(65 + j)}. ${escapeHtml(o)}</option>`).join('')}</select></div>`; }).join('')}<button class="primary-btn" id="to-replay">进入重听模式</button></div>`;
   }
   screen.innerHTML = paper('冷启动 · 考试模式', '完整播放后作答；程序先只反馈错题数量。', `<div class="paper-body">${body}</div>`, '模式 1/3');
+  attachAudioTracking();
   document.querySelectorAll('input[name^="exam-"]').forEach(x => x.addEventListener('change', ev => { const i = Number(ev.target.name.split('-')[1]); state.exam.answers[i] = Number(ev.target.value); saveState(); }));
   document.querySelectorAll('[data-confidence]').forEach(x => x.addEventListener('change', ev => { state.exam.confidence[Number(ev.target.dataset.confidence)] = ev.target.value; saveState(); }));
   if (document.getElementById('submit-exam')) document.getElementById('submit-exam').addEventListener('click', () => {
@@ -246,6 +249,7 @@ function renderReplay() {
   const collected = r.collected || false;
   const body = `${modeStrip('replay')}<div class="instruction"><strong>每段至少听两遍。</strong><span>第一遍抓意思，第二遍尽量还原原句；两遍后才能显示文本。准确标出障碍比反复盲听更重要。</span></div><div class="focus-pager"><button class="small-btn" id="replay-prev" ${idx === 0 ? 'disabled' : ''}>← 上一段</button><div><strong>${idx + 1} / ${C.evidence.length}</strong><span>${escapeHtml(item.label)}</span></div><button class="small-btn" id="replay-next" ${idx === C.evidence.length - 1 || !r.finished ? 'disabled' : ''}>下一段 →</button></div><div class="question-card"><header><h3>${escapeHtml(item.label)}</h3><span class="badge">证据段 ${idx + 1}</span></header>${audioPanel(item.audio, '真题证据段')}<div class="field"><label>不看文本，写下听到的关键词或句子</label><textarea id="replay-heard" placeholder="先记录听到的内容，不要求拼写完全正确">${escapeHtml(r.heard || '')}</textarea></div><div class="field"><label>主要障碍</label><div class="choice-row">${choice(`barrier-${item.id}`, 'U', '不认识', r.barrier === 'U')}${choice(`barrier-${item.id}`, 'S', '认识但没听出', r.barrier === 'S')}${choice(`barrier-${item.id}`, 'C', '组合失败', r.barrier === 'C')}${choice(`barrier-${item.id}`, 'M', '已听清', r.barrier === 'M')}</div></div>${r.revealed ? `<div class="transcript">${escapeHtml(item.text)}</div><label class="exam-option"><input type="checkbox" id="collect-evidence" ${collected ? 'checked' : ''}>收藏此证据句，加入复习队列</label>${recordingBlock('evidence', item.id, '录制证据句复述')}<button class="primary-btn" id="finish-evidence">完成本段</button>` : `<button class="primary-btn" id="reveal-evidence" ${plays < 2 ? 'disabled' : ''}>${plays < 2 ? `还需播放 ${2 - plays} 遍` : '显示原文并复述'}</button>`}</div>`;
   screen.innerHTML = paper('重听模式 · 证据定位', '考题对应句与必要上下文逐段处理。', `<div class="paper-body">${body}</div>`, '模式 2/3');
+  attachAudioTracking();
   document.getElementById('replay-heard').addEventListener('input', ev => { state.replay.items[item.id] = { ...(state.replay.items[item.id] || {}), heard: ev.target.value }; saveState(); });
   document.querySelectorAll(`input[name="barrier-${item.id}"]`).forEach(x => x.addEventListener('change', ev => { state.replay.items[item.id] = { ...(state.replay.items[item.id] || {}), barrier: ev.target.value }; saveState(); }));
   document.getElementById('replay-prev').addEventListener('click', () => { state.replay.current = idx - 1; saveState(); renderReplay(); });
@@ -288,6 +292,7 @@ function renderRepeat() {
   const r = state.repeat.items[item.id] || {};
   const body = `<div class="instruction"><strong>先听后复述。</strong><span>第一遍不看文本直接复述；需要时再查看关键词，第二轮覆盖录音。</span></div><div class="focus-pager"><button class="small-btn" id="repeat-prev" ${idx === 0 ? 'disabled' : ''}>← 上一句</button><div><strong>${idx + 1} / ${C.repeat.length}</strong><span>证据句复述</span></div><button class="small-btn" id="repeat-next" ${idx === C.repeat.length - 1 || r.score === undefined ? 'disabled' : ''}>下一句 →</button></div><div class="question-card">${audioPanel(item.audio, '原句')}${recordingBlock('repeat', item.id, '录制复述')}<details><summary>录音后查看关键词与原句</summary><div class="transcript">${escapeHtml(item.prompt)}</div><div class="transcript">${escapeHtml(item.text)}</div></details><div class="field" style="margin-top:14px"><span class="field-label">独立完成评分</span><div class="choice-row">${choice(`repeat-score-${item.id}`, '0', '0 无法完成', r.score === 0)}${choice(`repeat-score-${item.id}`, '1', '1 主要信息有缺失', r.score === 1)}${choice(`repeat-score-${item.id}`, '2', '2 信息完整清晰', r.score === 2)}</div></div></div><button class="primary-btn" id="finish-repeat" ${C.repeat.every(x => state.repeat.items[x.id]?.score !== undefined) ? '' : 'disabled'}>完成复述并进入口语</button>`;
   screen.innerHTML = paper('证据句复述', '把“听得懂”推进到“能够说出来”。', `<div class="paper-body">${body}</div>`, `${idx + 1}/${C.repeat.length}`);
+  attachAudioTracking();
   document.querySelectorAll(`input[name="repeat-score-${item.id}"]`).forEach(x => x.addEventListener('change', ev => { state.repeat.items[item.id] = { ...r, score: Number(ev.target.value) }; saveState(); renderRepeat(); }));
   document.getElementById('repeat-prev').addEventListener('click', () => { state.repeat.current = idx - 1; saveState(); renderRepeat(); });
   if (document.getElementById('repeat-next')) document.getElementById('repeat-next').addEventListener('click', () => { state.repeat.current = idx + 1; saveState(); renderRepeat(); });

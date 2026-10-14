@@ -4,7 +4,7 @@ window.COURSE = {
   title: '水产养殖与用餐偏好',
   subtitle: '3月24日真题：古代夏威夷鱼塘；口语主题：Dining Preferences。建议240分钟，可分段完成。',
   speakingTitle: 'Dining Preferences Interview',
-  fullAudio: 'L2_00_full_fish_farming.mp3',
+  fullAudio: 'L2_00_full_fish_farming_v2.mp3',
   examQuestions: [
     {
       question: 'According to the talk, what problem can excessive food and waste from fish farms cause?',
@@ -28,12 +28,12 @@ window.COURSE = {
     }
   ],
   evidence: [
-    { id: 'E1', label: '现代鱼类养殖的输入与后果', audio: 'L2_01_evidence_inputs.mp3', text: 'Modern fish farming relies on massive inputs of commercial feed to boost fish production. This can cause nutrient overload, where excessive amounts of uneaten food plus waste products trigger algal blooms.' },
-    { id: 'E2', label: '藻华如何造成缺氧', audio: 'L2_02_evidence_oxygen.mp3', text: 'When those algal blooms die off, they decompose and deplete oxygen from the water, which can suffocate fish and other aquatic life.' },
-    { id: 'E3', label: '农业径流与化肥', audio: 'L2_03_evidence_runoff.mp3', text: 'The main cause of algal blooms is chemical fertilizers in agricultural runoff, when water from rain or irrigation carries the fertilizers into rivers and coastal waters.' },
-    { id: 'E4', label: '古代夏威夷鱼塘', audio: 'L2_04_evidence_lokoia.mp3', text: "An intriguing alternative was the coastal fish ponds of ancient Hawaii, called Loko i'a. These ponds captured nutrient-rich runoff from nearby fields, naturally fertilizing the ponds." },
-    { id: 'E5', label: '潮汐冲洗保持稳定', audio: 'L2_05_evidence_tidal.mp3', text: 'The ponds used natural tidal flushing to bring in fresh seawater and remove waste, which kept oxygen levels stable.' },
-    { id: 'E6', label: '水闸的小孔设计', audio: 'L2_06_evidence_gates.mp3', text: 'The holes allowed juvenile fish to swim in from the ocean and fatten up on the food in the pond, but prevented them from escaping once they matured.' }
+    { id: 'E1', label: '现代鱼类养殖的输入与后果', audio: 'L2E_v2_01_inputs.mp3', text: 'Modern fish farming relies on massive inputs of commercial feed to boost fish production. This can cause nutrient overload, where excessive amounts of uneaten food plus waste products trigger algal blooms.' },
+    { id: 'E2', label: '藻华如何造成缺氧', audio: 'L2E_v2_02_oxygen.mp3', text: 'When those algal blooms die off, they decompose and deplete oxygen from the water, which can suffocate fish and other aquatic life.' },
+    { id: 'E3', label: '农业径流与化肥', audio: 'L2E_v2_03_runoff.mp3', text: 'Of course, the main cause of algal blooms is chemical fertilizers in agricultural runoff, like when water from rain or irrigation flows over fields and carries the fertilizers into rivers and coastal waters.' },
+    { id: 'E4', label: '古代夏威夷鱼塘', audio: 'L2E_v2_04_lokoia.mp3', text: "An intriguing alternative is, or was, the coastal fish ponds of ancient Hawaii, called Loko i'a. People in Hawaii are reviving them today. These ponds, built along the shore using mainly lava, captured nutrient-rich runoff from nearby fields, naturally fertilizing the ponds." },
+    { id: 'E5', label: '潮汐冲洗保持稳定', audio: 'L2E_v2_05_tidal.mp3', text: 'The ponds used natural tidal flushing to bring in fresh seawater and remove waste, which kept oxygen levels stable.' },
+    { id: 'E6', label: '水闸的小孔设计', audio: 'L2E_v2_06_gates.mp3', text: "And here's the clever part. The special sluice gates connecting the ponds to the ocean had small holes. These holes allowed juvenile fish to swim in from the ocean and fatten up on the food in the pond, but then prevented them from escaping once they matured, so they could be easily harvested." }
   ],
   vocab: [
     { id: 'V01', word: 'commercial feed', meaning: '商业鱼饲料', context: 'massive inputs of commercial feed', type: '基础词块' },
@@ -54,12 +54,12 @@ window.COURSE = {
     { id: 'V16', word: 'mature', meaning: '成熟；长成', context: 'once they matured', type: '基础词汇' }
   ],
   repeat: [
-    { id: 'R1', audio: 'L2_01_evidence_inputs.mp3', prompt: 'commercial feed · boost production · nutrient overload', text: 'Modern fish farming relies on massive inputs of commercial feed to boost fish production.' },
-    { id: 'R2', audio: 'L2_02_evidence_oxygen.mp3', prompt: 'die off · decompose · deplete oxygen · suffocate', text: 'When algal blooms die off, they decompose and deplete oxygen from the water.' },
-    { id: 'R3', audio: 'L2_03_evidence_runoff.mp3', prompt: 'fertilizers · agricultural runoff · irrigation', text: 'Agricultural runoff carries chemical fertilizers into rivers and coastal waters.' },
-    { id: 'R4', audio: 'L2_04_evidence_lokoia.mp3', prompt: "coastal fish ponds · ancient Hawaii · nutrient-rich runoff", text: "The coastal fish ponds of ancient Hawaii captured nutrient-rich runoff from nearby fields." },
-    { id: 'R5', audio: 'L2_05_evidence_tidal.mp3', prompt: 'tidal flushing · fresh seawater · remove waste · stable', text: 'Natural tidal flushing brought in fresh seawater, removed waste, and kept oxygen levels stable.' },
-    { id: 'R6', audio: 'L2_06_evidence_gates.mp3', prompt: 'juvenile fish · fatten up · mature · escaping', text: 'The holes allowed juvenile fish to enter but prevented them from escaping once they matured.' }
+    { id: 'R1', audio: 'L2R_v2_01_inputs.mp3', prompt: 'commercial feed · boost production · nutrient overload', text: 'Modern fish farming relies on massive inputs of commercial feed to boost fish production.' },
+    { id: 'R2', audio: 'L2R_v2_02_oxygen.mp3', prompt: 'die off · decompose · deplete oxygen', text: 'When those algal blooms die off, they decompose and deplete oxygen from the water.' },
+    { id: 'R3', audio: 'L2R_v2_03_runoff.mp3', prompt: 'fertilizers · agricultural runoff · irrigation', text: 'Of course, the main cause of algal blooms is chemical fertilizers in agricultural runoff, like when water from rain or irrigation flows over fields and carries the fertilizers into rivers and coastal waters.' },
+    { id: 'R4', audio: 'L2R_v2_04_lokoia.mp3', prompt: "built along the shore · lava · nutrient-rich runoff", text: 'These ponds, built along the shore using mainly lava, captured nutrient-rich runoff from nearby fields, naturally fertilizing the ponds.' },
+    { id: 'R5', audio: 'L2R_v2_05_tidal.mp3', prompt: 'tidal flushing · fresh seawater · remove waste · stable', text: 'The ponds used natural tidal flushing to bring in fresh seawater and remove waste, which kept oxygen levels stable.' },
+    { id: 'R6', audio: 'L2R_v2_06_gates.mp3', prompt: 'juvenile fish · fatten up · mature · harvested', text: 'These holes allowed juvenile fish to swim in from the ocean and fatten up on the food in the pond, but then prevented them from escaping once they matured, so they could be easily harvested.' }
   ],
   interview: [
     { id: 'Q1', question: 'How often do you eat out at restaurants? Do you do this daily, weekly, monthly, or less often?', structure: '频率 + 场景 + 原因' },

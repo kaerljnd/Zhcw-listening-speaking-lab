@@ -28,12 +28,12 @@ window.COURSE = {
     }
   ],
   evidence: [
-    { id: 'E1', label: '市场细分的基本定义', audio: 'L3_01_evidence_definition.mp3', text: 'Market segmentation is the strategic process of dividing a broad audience into smaller groups based on shared traits, like age, lifestyle, income, or values.' },
-    { id: 'E2', label: '定制信息与精准沟通', audio: 'L3_02_evidence_tailored.mp3', text: "This allows companies to craft tailored messages and products that speak directly to each group's unique needs." },
-    { id: 'E3', label: '瞄准高潜力市场', audio: 'L3_03_evidence_profitable.mp3', text: 'Segmentation helps businesses focus on high-potential markets and the most profitable segments.' },
-    { id: 'E4', label: '城市消费者案例', audio: 'L3_04_evidence_urban.mp3', text: 'A cell phone company might discover that urban professionals buy new phones far more often than rural inhabitants.' },
-    { id: 'E5', label: '顾客满意度与忠诚度', audio: 'L3_05_evidence_loyalty.mp3', text: 'When consumers feel understood, they are more likely to stay loyal to a product or service.' },
-    { id: 'E6', label: '数据收集与持续监测', audio: 'L3_06_evidence_data.mp3', text: 'Implementing segmentation effectively requires rigorous data collection and analysis, and companies need to monitor groups continuously as consumer preferences evolve.' }
+    { id: 'E1', label: '市场细分的基本定义', audio: 'L3E_v2_01_definition.mp3', text: 'Market segmentation is the strategic process of dividing a broad audience into smaller groups based on shared traits, like age, lifestyle, income, or even values.' },
+    { id: 'E2', label: '定制信息与精准沟通', audio: 'L3E_v2_02_tailored.mp3', text: "This allows companies to craft tailored messages and products that speak directly to each group's unique needs." },
+    { id: 'E3', label: '瞄准高潜力市场', audio: 'L3E_v2_03_profitable.mp3', text: 'Second, segmentation helps businesses focus on high-potential markets, focusing on the most profitable segments.' },
+    { id: 'E4', label: '城市消费者案例', audio: 'L3E_v2_04_urban.mp3', text: 'A cell phone company might discover that urban professionals buy new phones far more often than rural inhabitants.' },
+    { id: 'E5', label: '顾客满意度与忠诚度', audio: 'L3E_v2_05_loyalty.mp3', text: "Segmentation also boosts customer satisfaction. When consumers feel understood, they're more likely to stay loyal to a product or service." },
+    { id: 'E6', label: '数据收集与持续监测', audio: 'L3E_v2_06_data.mp3', text: 'However, implementing segmentation effectively requires rigorous data collection and analysis. Companies must gather insights from surveys, purchase histories, social media behavior, and more to define meaningful segments. Once identified, they need to monitor these groups continuously as consumer preferences evolve over time.' }
   ],
   vocab: [
     { id: 'V01', word: 'market segmentation', meaning: '市场细分', context: 'a cornerstone of modern marketing', type: '学术词汇' },
@@ -54,12 +54,12 @@ window.COURSE = {
     { id: 'V16', word: 'consumer preferences evolve', meaning: '消费者偏好不断变化', context: 'as consumer preferences evolve over time', type: '学术词块' }
   ],
   repeat: [
-    { id: 'R1', audio: 'L3_01_evidence_definition.mp3', prompt: 'strategic process · broad audience · shared traits', text: 'Market segmentation divides a broad audience into smaller groups based on shared traits.' },
-    { id: 'R2', audio: 'L3_02_evidence_tailored.mp3', prompt: 'craft · tailored messages · unique needs', text: 'Companies can craft tailored messages that speak to each group’s unique needs.' },
-    { id: 'R3', audio: 'L3_03_evidence_profitable.mp3', prompt: 'high-potential markets · profitable segments', text: 'Segmentation helps businesses focus on high-potential markets and profitable segments.' },
-    { id: 'R4', audio: 'L3_04_evidence_urban.mp3', prompt: 'urban professionals · more often · rural inhabitants', text: 'Urban professionals may buy new phones more often than rural inhabitants.' },
-    { id: 'R5', audio: 'L3_05_evidence_loyalty.mp3', prompt: 'feel understood · stay loyal · product or service', text: 'Consumers who feel understood are more likely to stay loyal to a product or service.' },
-    { id: 'R6', audio: 'L3_06_evidence_data.mp3', prompt: 'rigorous data collection · monitor continuously · evolve', text: 'Companies must collect data and monitor groups continuously as preferences evolve.' }
+    { id: 'R1', audio: 'L3R_v2_01_definition.mp3', prompt: 'strategic process · broad audience · shared traits', text: 'Market segmentation is the strategic process of dividing a broad audience into smaller groups based on shared traits, like age, lifestyle, income, or even values.' },
+    { id: 'R2', audio: 'L3R_v2_02_tailored.mp3', prompt: 'craft · tailored messages · unique needs', text: "This allows companies to craft tailored messages and products that speak directly to each group's unique needs." },
+    { id: 'R3', audio: 'L3R_v2_03_profitable.mp3', prompt: 'high-potential markets · profitable segments', text: 'Second, segmentation helps businesses focus on high-potential markets, focusing on the most profitable segments.' },
+    { id: 'R4', audio: 'L3R_v2_04_urban.mp3', prompt: 'urban professionals · more often · rural inhabitants', text: 'A cell phone company might discover that urban professionals buy new phones far more often than rural inhabitants.' },
+    { id: 'R5', audio: 'L3R_v2_05_loyalty.mp3', prompt: 'feel understood · stay loyal · product or service', text: "When consumers feel understood, they're more likely to stay loyal to a product or service." },
+    { id: 'R6', audio: 'L3R_v2_06_data.mp3', prompt: 'monitor continuously · consumer preferences · evolve over time', text: 'Once identified, they need to monitor these groups continuously as consumer preferences evolve over time.' }
   ],
   interview: [
     { id: 'Q1', question: 'Do you enjoy shopping for clothes, or is it something you find tedious? Why?', structure: '态度 + 原因 + 例子' },
