@@ -107,7 +107,10 @@ function attachAudioTracking() {
   document.querySelectorAll('audio[data-audio-id]').forEach(audio => {
     if (audio.dataset.trackingAttached === '1') return;
     audio.dataset.trackingAttached = '1';
-    audio.addEventListener('play', () => {
+    let countedForCurrentRun = false;
+    const countPlayback = () => {
+      if (countedForCurrentRun) return;
+      countedForCurrentRun = true;
       const id = audio.dataset.audioId;
       state.plays[id] = (state.plays[id] || 0) + 1;
       document.querySelectorAll(`[data-play-count="${id}"]`).forEach(x => x.textContent = state.plays[id]);
@@ -120,7 +123,14 @@ function attachAudioTracking() {
         }
       }
       saveState();
+    };
+    audio.addEventListener('play', countPlayback);
+    audio.addEventListener('playing', countPlayback);
+    audio.addEventListener('timeupdate', () => {
+      if (!audio.paused && audio.currentTime > 0) countPlayback();
     });
+    audio.addEventListener('pause', () => { countedForCurrentRun = false; });
+    audio.addEventListener('ended', () => { countedForCurrentRun = false; });
   });
 }
 
