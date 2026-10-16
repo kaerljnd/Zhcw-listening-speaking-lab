@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#163653">
+  <title>Zhcw 听说训练工作台</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="app" class="app-shell">
+    <aside class="sidebar" aria-label="课程导航">
+      <div class="brand">
+        <div class="brand-mark">Z</div>
+        <div>
+          <strong>Zhcw Lab</strong>
+          <span>Listening × Speaking</span>
+        </div>
+      </div>
+      <div class="lesson-chip" id="lesson-chip">课程加载中…</div>
+      <nav id="task-nav" class="task-nav"></nav>
+      <div class="side-actions">
+        <button class="ghost-btn" id="mode-toggle">切换教师端</button>
+        <button class="ghost-btn" id="export-btn">导出学习记录</button>
+      </div>
+    </aside>
+
+    <main class="workspace">
+      <header class="topbar">
+        <button id="mobile-menu" class="icon-btn mobile-only" aria-label="打开导航">☰</button>
+        <div>
+          <div class="eyebrow" id="screen-eyebrow">STUDENT WORKSPACE</div>
+          <h1 id="screen-title">今日学习路线</h1>
+        </div>
+        <div class="progress-wrap" aria-label="课程进度">
+          <div class="progress-copy"><span>课程进度</span><strong id="progress-text">0%</strong></div>
+          <div class="progress-track"><div id="progress-bar" class="progress-bar"></div></div>
+        </div>
+      </header>
+      <section id="screen" class="screen" aria-live="polite"></section>
+    </main>
+  </div>
+
+  <div id="toast" class="toast" role="status"></div>
+  <script src="lesson-config.js?v=20261016-4"></script>
+  <script src="app.js?v=20261016-4"></script>
+</body>
+</html>
