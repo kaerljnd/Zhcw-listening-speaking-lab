@@ -1,6 +1,6 @@
 # Zhcw Listening and Speaking Lab
 
-这是 Zhcw 的本地网页课程项目，目前包含 Lesson 1、Lesson 2 和 Lesson 3。
+这是 Zhcw 的听说综合网页课程项目，目前包含 Lesson 1 至 Lesson 7。Lesson 2 至 Lesson 7 支持生成并下载 PNG 学习打卡图。
 
 ## 本地预览
 
@@ -16,7 +16,7 @@ python3 -m http.server 8000
 
 1. 在 GitHub 新建一个空仓库，例如 `zhcw-listening-speaking-lab`。
 2. 不要勾选自动添加 README、许可证或 `.gitignore`。
-3. 把本项目根目录中的全部文件和三个 lesson 文件夹上传到仓库根目录。
+3. 把本项目根目录中的全部文件和 lesson 文件夹上传到仓库根目录。
 4. 打开仓库的 `Settings`。
 5. 在左侧选择 `Pages`。
 6. 在 `Build and deployment` 中将 `Source` 设为 `Deploy from a branch`。

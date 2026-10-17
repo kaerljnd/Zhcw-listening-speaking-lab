@@ -19,6 +19,8 @@ const navItems = [
 
 const defaultState = () => ({
   version: 2,
+  startedAt: new Date().toISOString(),
+  lastActiveAt: new Date().toISOString(),
   activeScreen: 'home',
   completed: {},
   plays: {},
@@ -54,6 +56,7 @@ function loadState() {
 }
 
 function saveState(message = '') {
+  state.lastActiveAt = new Date().toISOString();
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   updateProgress();
   renderNav();
@@ -341,10 +344,11 @@ function renderDashboard() {
   const repeatScores = C.repeat.map(x => state.repeat.items[x.id]?.score).filter(x => x !== undefined);
   const firstCorrect = C.examQuestions.filter((q, i) => Number(state.exam.answers[i]) === q.answer).length;
   const revisedCorrect = C.examQuestions.filter((q, i) => Number(state.exam.revision[i] ?? state.exam.answers[i]) === q.answer).length;
-  const body = `<div class="metric-grid"><div class="metric-card"><span>冷启动正确</span><strong>${firstCorrect}/${C.examQuestions.length}</strong></div><div class="metric-card"><span>重做后正确</span><strong>${revisedCorrect}/${C.examQuestions.length}</strong></div><div class="metric-card"><span>词汇复查队列</span><strong>${review.length}</strong></div><div class="metric-card"><span>复述平均分</span><strong>${repeatScores.length ? (repeatScores.reduce((a, b) => a + b, 0) / repeatScores.length).toFixed(1) : '—'}</strong></div></div><h3 style="color:var(--navy);margin-top:28px">词汇复查队列</h3>${review.length ? `<table class="dashboard-table"><thead><tr><th>词 / 词块</th><th>词义</th><th>状态</th></tr></thead><tbody>${review.map(x => `<tr><td>${escapeHtml(x.word)}</td><td>${escapeHtml(x.meaning)}</td><td>${escapeHtml(state.vocab.items[x.id]?.status || '收藏')}</td></tr>`).join('')}</tbody></table>` : '<div class="empty">尚未形成复查队列</div>'}<h3 style="color:var(--navy);margin-top:28px">收藏的证据句</h3>${C.evidence.filter(x => state.replay.items[x.id]?.collected).map(x => `<div class="transcript">${escapeHtml(x.text)}</div>`).join('') || '<div class="empty">尚未收藏证据句</div>'}<h3 style="color:var(--navy);margin-top:28px">录音记录</h3><div id="teacher-recordings" class="recordings"><div class="empty">正在读取…</div></div><h3 style="color:var(--navy);margin-top:28px">教师课堂备注</h3><textarea class="teacher-note" id="teacher-summary">${escapeHtml(state.teacherNotes.summary || '')}</textarea><div class="control-row" style="margin-top:15px"><button class="primary-btn" id="save-teacher-note">保存备注</button><button class="secondary-btn" id="dashboard-export">导出JSON记录</button><button class="danger-btn" id="reset-all">清空本课数据</button></div>`;
+  const body = `<div class="metric-grid"><div class="metric-card"><span>冷启动正确</span><strong>${firstCorrect}/${C.examQuestions.length}</strong></div><div class="metric-card"><span>重做后正确</span><strong>${revisedCorrect}/${C.examQuestions.length}</strong></div><div class="metric-card"><span>词汇复查队列</span><strong>${review.length}</strong></div><div class="metric-card"><span>复述平均分</span><strong>${repeatScores.length ? (repeatScores.reduce((a, b) => a + b, 0) / repeatScores.length).toFixed(1) : '—'}</strong></div></div><h3 style="color:var(--navy);margin-top:28px">词汇复查队列</h3>${review.length ? `<table class="dashboard-table"><thead><tr><th>词 / 词块</th><th>词义</th><th>状态</th></tr></thead><tbody>${review.map(x => `<tr><td>${escapeHtml(x.word)}</td><td>${escapeHtml(x.meaning)}</td><td>${escapeHtml(state.vocab.items[x.id]?.status || '收藏')}</td></tr>`).join('')}</tbody></table>` : '<div class="empty">尚未形成复查队列</div>'}<h3 style="color:var(--navy);margin-top:28px">收藏的证据句</h3>${C.evidence.filter(x => state.replay.items[x.id]?.collected).map(x => `<div class="transcript">${escapeHtml(x.text)}</div>`).join('') || '<div class="empty">尚未收藏证据句</div>'}<h3 style="color:var(--navy);margin-top:28px">录音记录</h3><div id="teacher-recordings" class="recordings"><div class="empty">正在读取…</div></div><h3 style="color:var(--navy);margin-top:28px">教师课堂备注</h3><textarea class="teacher-note" id="teacher-summary">${escapeHtml(state.teacherNotes.summary || '')}</textarea><div class="control-row" style="margin-top:15px"><button class="primary-btn" id="save-teacher-note">保存备注</button><button class="secondary-btn" id="dashboard-report">生成打卡图</button><button class="secondary-btn" id="dashboard-export">导出JSON记录</button><button class="danger-btn" id="reset-all">清空本课数据</button></div>`;
   screen.innerHTML = paper('教师数据面板', '仅显示 Zhcw 本课数据；录音默认保存在当前浏览器。', `<div class="paper-body">${body}</div>`, 'Teacher');
   populateDashboardRecordings();
   document.getElementById('save-teacher-note').addEventListener('click', () => { state.teacherNotes.summary = document.getElementById('teacher-summary').value; saveState('教师备注已保存'); });
+  document.getElementById('dashboard-report').addEventListener('click', showCheckinReport);
   document.getElementById('dashboard-export').addEventListener('click', exportState);
   document.getElementById('reset-all').addEventListener('click', resetAll);
 }
@@ -358,6 +362,123 @@ function exportState() {
   const payload = { student: 'Zhcw', lesson: `${C.lessonLabel} · ${C.title}`, exportedAt: new Date().toISOString(), state };
   downloadBlob(new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' }), `Zhcw_${C.lessonLabel.replace(' ', '')}_${new Date().toISOString().slice(0, 10)}.json`);
   toast('学习记录已导出');
+}
+
+function getCheckinData() {
+  const firstCorrect = C.examQuestions.filter((q, i) => Number(state.exam.answers[i]) === q.answer).length;
+  const replayDone = C.evidence.filter(x => state.replay.items[x.id]?.finished).length;
+  const vocabDone = C.vocab.filter(x => state.vocab.items[x.id]?.status).length;
+  const review = C.vocab.filter(x => { const v = state.vocab.items[x.id]; return v?.collected || (v?.status && v.status !== 'M'); }).length;
+  const repeatScores = C.repeat.map(x => state.repeat.items[x.id]?.score).filter(x => x !== undefined);
+  const interviewDone = C.interview.filter(x => state.interview.items[x.id]?.done).length;
+  const completedSections = ['exam', 'replay', 'vocab', 'repeat', 'interview', 'transfer'].filter(id => state.completed[id]).length;
+  const start = Date.parse(state.startedAt || '');
+  const end = Date.parse(state.lastActiveAt || '');
+  const minutes = Number.isFinite(start) && Number.isFinite(end) ? Math.max(1, Math.round((end - start) / 60000)) : 0;
+  return {
+    date: new Date().toLocaleDateString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit' }),
+    progress: Math.round(completedSections / 6 * 100),
+    minutes,
+    rows: [
+      ['听力冷启动', `${Object.keys(state.exam.answers).length}/${C.examQuestions.length} 题`, state.exam.phase > 1 ? `${firstCorrect}/${C.examQuestions.length}` : '进行中'],
+      ['证据重听', `${replayDone}/${C.evidence.length} 段`, replayDone === C.evidence.length ? '已完成' : '继续练习'],
+      ['词汇学习', `${vocabDone}/${C.vocab.length} 个`, review ? `复习 ${review} 个` : (vocabDone ? '全部已掌握' : '未开始')],
+      ['证据句复述', `${repeatScores.length}/${C.repeat.length} 句`, repeatScores.length ? `均分 ${(repeatScores.reduce((a, b) => a + b, 0) / repeatScores.length).toFixed(1)}/2` : '未评分'],
+      ['Interview', `${interviewDone}/${C.interview.length} 题`, interviewDone ? '两轮表达' : '未完成'],
+      ['迁移练习', state.completed.transfer ? '1/1 题' : '0/1 题', state.completed.transfer ? '已完成' : '未完成']
+    ]
+  };
+}
+
+function roundRect(ctx, x, y, width, height, radius, fill, stroke = '') {
+  const r = Math.min(radius, width / 2, height / 2);
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + width, y, x + width, y + height, r);
+  ctx.arcTo(x + width, y + height, x, y + height, r);
+  ctx.arcTo(x, y + height, x, y, r);
+  ctx.arcTo(x, y, x + width, y, r);
+  ctx.closePath();
+  if (fill) { ctx.fillStyle = fill; ctx.fill(); }
+  if (stroke) { ctx.strokeStyle = stroke; ctx.lineWidth = 2; ctx.stroke(); }
+}
+
+function drawWrappedText(ctx, text, x, y, maxWidth, lineHeight, maxLines = 2) {
+  const chars = Array.from(text);
+  let line = '';
+  let lines = [];
+  chars.forEach(char => {
+    const test = line + char;
+    if (ctx.measureText(test).width > maxWidth && line) { lines.push(line); line = char; } else line = test;
+  });
+  if (line) lines.push(line);
+  if (lines.length > maxLines) { lines = lines.slice(0, maxLines); lines[maxLines - 1] = `${lines[maxLines - 1].slice(0, -1)}…`; }
+  lines.forEach((value, i) => ctx.fillText(value, x, y + i * lineHeight));
+  return lines.length;
+}
+
+function createCheckinCanvas() {
+  const data = getCheckinData();
+  const canvas = document.createElement('canvas');
+  canvas.width = 1200;
+  canvas.height = 1500;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#eef7f5';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  roundRect(ctx, 70, 60, 1060, 1380, 34, '#ffffff', '#bcebe3');
+
+  roundRect(ctx, 105, 105, 76, 76, 22, '#0e988b');
+  ctx.fillStyle = '#ffffff'; ctx.font = '800 42px Arial'; ctx.textAlign = 'center'; ctx.fillText('Z', 143, 158);
+  ctx.textAlign = 'left'; ctx.fillStyle = '#0b756d'; ctx.font = '800 54px "Microsoft YaHei", sans-serif'; ctx.fillText('今日学习报告', 205, 156);
+  ctx.fillStyle = '#63758a'; ctx.font = '500 27px "Microsoft YaHei", sans-serif'; ctx.fillText(`Zhcw  ·  ${data.date}`, 108, 225);
+  ctx.fillStyle = '#173653'; ctx.font = '700 31px "Microsoft YaHei", sans-serif';
+  drawWrappedText(ctx, `${C.lessonLabel} · ${C.title}`, 108, 278, 760, 42, 2);
+
+  roundRect(ctx, 900, 120, 170, 94, 47, '#d7f7f0');
+  ctx.fillStyle = '#08766d'; ctx.font = '800 34px Arial'; ctx.textAlign = 'center'; ctx.fillText(`${data.progress}%`, 985, 178);
+  ctx.fillStyle = '#0e988b'; ctx.font = '700 20px "Microsoft YaHei", sans-serif'; ctx.fillText('课程进度', 985, 205);
+
+  const tableX = 108, tableY = 370, tableW = 984, headerH = 72, rowH = 112;
+  roundRect(ctx, tableX, tableY, tableW, headerH + data.rows.length * rowH, 20, '#ffffff', '#d7e5e7');
+  ctx.save(); ctx.beginPath(); ctx.rect(tableX, tableY, tableW, headerH); ctx.clip(); roundRect(ctx, tableX, tableY, tableW, headerH, 20, '#163653'); ctx.restore();
+  ctx.textAlign = 'left'; ctx.fillStyle = '#ffffff'; ctx.font = '700 24px "Microsoft YaHei", sans-serif';
+  ctx.fillText('训练类型', 145, tableY + 46); ctx.fillText('完成数量', 560, tableY + 46); ctx.fillText('结果', 835, tableY + 46);
+  data.rows.forEach((row, i) => {
+    const y = tableY + headerH + i * rowH;
+    ctx.fillStyle = i % 2 ? '#f8fbfc' : '#ffffff'; ctx.fillRect(tableX + 2, y, tableW - 4, rowH);
+    ctx.strokeStyle = '#dfe9ec'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(tableX, y); ctx.lineTo(tableX + tableW, y); ctx.stroke();
+    ctx.fillStyle = '#203247'; ctx.font = '700 28px "Microsoft YaHei", sans-serif'; ctx.fillText(row[0], 145, y + 68);
+    ctx.fillStyle = '#4f6578'; ctx.font = '600 26px "Microsoft YaHei", sans-serif'; ctx.fillText(row[1], 560, y + 68);
+    roundRect(ctx, 820, y + 30, 225, 54, 27, row[2].includes('未') || row[2].includes('继续') || row[2].includes('进行') ? '#fff0d6' : '#d2f6ee');
+    ctx.fillStyle = row[2].includes('未') || row[2].includes('继续') || row[2].includes('进行') ? '#9a6500' : '#08766d'; ctx.font = '700 22px "Microsoft YaHei", sans-serif'; ctx.textAlign = 'center'; ctx.fillText(row[2], 932, y + 65); ctx.textAlign = 'left';
+  });
+
+  const footerY = 1185;
+  roundRect(ctx, 108, footerY, 984, 120, 18, '#edf8f6');
+  ctx.fillStyle = '#0e988b'; ctx.font = '800 26px "Microsoft YaHei", sans-serif'; ctx.fillText('本次学习', 142, footerY + 44);
+  ctx.fillStyle = '#173653'; ctx.font = '700 26px "Microsoft YaHei", sans-serif'; ctx.fillText(`已记录约 ${data.minutes || 1} 分钟  ·  真题听辨  ·  词汇积累  ·  复述迁移`, 142, footerY + 86);
+  ctx.fillStyle = '#6a7a8b'; ctx.font = '500 21px "Microsoft YaHei", sans-serif'; ctx.textAlign = 'center'; ctx.fillText('Zhcw Listening × Speaking Lab', 600, 1380);
+  return canvas;
+}
+
+function showCheckinReport() {
+  document.getElementById('checkin-modal')?.remove();
+  const canvas = createCheckinCanvas();
+  const modal = document.createElement('div');
+  modal.id = 'checkin-modal';
+  modal.className = 'report-modal';
+  modal.innerHTML = `<div class="report-dialog" role="dialog" aria-modal="true" aria-label="今日学习报告"><div class="report-dialog-head"><div><span>CHECK-IN REPORT</span><h2>今日学习报告</h2></div><button class="report-close" aria-label="关闭">×</button></div><img class="report-preview" alt="Zhcw 今日学习报告预览"><div class="report-actions"><button class="secondary-btn" data-report-close>关闭</button><button class="primary-btn" id="download-report">保存打卡图片</button></div></div>`;
+  modal.querySelector('.report-preview').src = canvas.toDataURL('image/png');
+  const close = () => modal.remove();
+  modal.querySelector('.report-close').addEventListener('click', close);
+  modal.querySelector('[data-report-close]').addEventListener('click', close);
+  modal.addEventListener('click', ev => { if (ev.target === modal) close(); });
+  modal.querySelector('#download-report').addEventListener('click', () => canvas.toBlob(blob => {
+    if (!blob) return toast('生成图片失败，请重试');
+    downloadBlob(blob, `Zhcw_${C.lessonLabel.replace(' ', '')}_${new Date().toISOString().slice(0, 10)}_打卡.png`);
+    toast('打卡图片已保存');
+  }, 'image/png'));
+  document.body.appendChild(modal);
 }
 
 async function resetAll() {
@@ -400,6 +521,7 @@ async function populateDashboardRecordings() {
 
 document.getElementById('mode-toggle').addEventListener('click', () => { appMode = appMode === 'student' ? 'teacher' : 'student'; document.getElementById('mode-toggle').textContent = appMode === 'student' ? '切换教师端' : '返回学生端'; if (appMode === 'teacher') state.activeScreen = 'dashboard'; else if (state.activeScreen === 'dashboard') state.activeScreen = 'home'; render(); });
 document.getElementById('export-btn').addEventListener('click', exportState);
+document.getElementById('report-btn')?.addEventListener('click', showCheckinReport);
 document.getElementById('mobile-menu').addEventListener('click', () => document.querySelector('.sidebar').classList.toggle('open'));
 
 render();
