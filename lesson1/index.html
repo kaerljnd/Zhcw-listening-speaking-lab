@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#163653">
   <title>Zhcw 听说训练工作台</title>
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css?v=20261017-student-flow">
 </head>
 <body>
   <div id="app" class="app-shell">
@@ -20,7 +20,8 @@
       <div class="lesson-chip">Lesson 1 · 兴趣与探索</div>
       <nav id="task-nav" class="task-nav"></nav>
       <div class="side-actions">
-        <button class="ghost-btn" id="mode-toggle">切换教师端</button>
+        <a class="ghost-btn side-link" href="../">← 返回课程首页</a>
+        <button class="ghost-btn" id="report-btn">生成打卡图</button>
         <button class="ghost-btn" id="export-btn">导出学习记录</button>
       </div>
     </aside>
@@ -42,6 +43,6 @@
   </div>
 
   <div id="toast" class="toast" role="status"></div>
-  <script src="app.js"></script>
+  <script src="app.js?v=20261017-student-flow"></script>
 </body>
 </html>

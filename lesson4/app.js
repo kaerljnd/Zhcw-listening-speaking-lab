@@ -35,7 +35,6 @@ const defaultState = () => ({
 });
 
 let state = loadState();
-let appMode = 'student';
 let activeRecorder = null;
 let activeTimer = null;
 let toastTimer = null;
@@ -51,7 +50,10 @@ document.title = `Zhcw ${C.lessonLabel}｜${C.title}`;
 function loadState() {
   try {
     const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY));
-    return parsed && parsed.version === 2 ? { ...defaultState(), ...parsed } : defaultState();
+    if (!parsed || parsed.version !== 2) return defaultState();
+    const restored = { ...defaultState(), ...parsed };
+    if (restored.activeScreen === 'dashboard') restored.activeScreen = restored.completed.transfer ? 'transfer' : 'home';
+    return restored;
   } catch { return defaultState(); }
 }
 
@@ -138,8 +140,7 @@ function attachAudioTracking() {
 }
 
 function renderNav() {
-  const items = appMode === 'teacher' ? [...navItems, ['dashboard', 'T', '教师数据面板']] : navItems;
-  nav.innerHTML = items.map(([id, num, label]) => {
+  nav.innerHTML = navItems.map(([id, num, label]) => {
     const done = state.completed[id] || id === 'home';
     return `<button class="nav-item ${state.activeScreen === id ? 'active' : ''} ${done ? 'done' : ''}" data-nav="${id}"><span class="nav-num">${num}</span><span>${escapeHtml(label)}</span><span class="nav-status">${done ? '✓' : '○'}</span></button>`;
   }).join('');
@@ -154,7 +155,6 @@ function updateProgress() {
 }
 
 function navigate(id) {
-  if (id === 'dashboard' && appMode !== 'teacher') return;
   state.activeScreen = id;
   saveState();
   document.querySelector('.sidebar').classList.remove('open');
@@ -163,10 +163,10 @@ function navigate(id) {
 }
 
 function render() {
-  const current = [...navItems, ['dashboard', 'T', '教师数据面板']].find(x => x[0] === state.activeScreen) || navItems[0];
+  const current = navItems.find(x => x[0] === state.activeScreen) || navItems[0];
   titleEl.textContent = current[2];
-  eyebrowEl.textContent = appMode === 'teacher' ? 'TEACHER DASHBOARD' : 'STUDENT WORKSPACE';
-  const routes = { home: renderHome, exam: renderExam, replay: renderReplay, vocab: renderVocab, repeat: renderRepeat, interview: renderInterview, transfer: renderTransfer, dashboard: renderDashboard };
+  eyebrowEl.textContent = 'STUDENT WORKSPACE';
+  const routes = { home: renderHome, exam: renderExam, replay: renderReplay, vocab: renderVocab, repeat: renderRepeat, interview: renderInterview, transfer: renderTransfer };
   (routes[state.activeScreen] || renderHome)();
   attachAudioTracking();
   bindRecordButtons();
@@ -185,12 +185,11 @@ function renderHome() {
       <div class="route-card"><div class="route-index">03</div><strong>词汇教学</strong><p>逐个显示读音、中文词义和原文语境。</p></div>
       <div class="route-card"><div class="route-index">04</div><strong>复述迁移</strong><p>把新词用于复述和${escapeHtml(C.speakingTitle)}。</p></div>
     </div>
-    <div class="control-row" style="margin-top:24px"><button class="primary-btn" id="start-lesson">开启麦克风并开始 ${escapeHtml(C.lessonLabel)}</button><button class="secondary-btn" id="teacher-shortcut">查看已有记录</button></div>
+    <div class="control-row" style="margin-top:24px"><button class="primary-btn" id="start-lesson">开启麦克风并开始 ${escapeHtml(C.lessonLabel)}</button></div>
   </div>`;
   screen.innerHTML = paper(C.title, C.subtitle, body, '无纸化课堂');
   document.getElementById('microphone-permission-btn').addEventListener('click', requestMicrophoneAccess);
   document.getElementById('start-lesson').addEventListener('click', async () => { const ready = microphoneState === 'granted' || await requestMicrophoneAccess(); if (ready) navigate('exam'); });
-  document.getElementById('teacher-shortcut').addEventListener('click', () => { appMode = 'teacher'; document.getElementById('mode-toggle').textContent = '返回学生端'; navigate('dashboard'); });
   refreshMicrophoneStatus();
 }
 
@@ -328,6 +327,10 @@ function renderInterview() {
 }
 
 function renderTransfer() {
+  if (state.completed.transfer) {
+    renderCompletion();
+    return;
+  }
   const t = state.transfer;
   const body = `<div class="instruction"><strong>迁移题：</strong><span>换一个表面话题，但复用本课的论证结构与至少两个新词块。</span></div><div class="question-card"><div class="question-text">${escapeHtml(C.transferQuestion)}</div><div class="field"><label>30秒关键词计划</label><textarea id="transfer-plan">${escapeHtml(t.plan)}</textarea></div><div class="control-row"><button class="small-btn" id="transfer-timer">开始30秒准备</button><span class="timer" id="transfer-display">00:30</span></div>${recordingBlock('transfer', 'final', '录制45秒迁移回答')}</div><div class="two-grid"><div class="field"><label>本课最需要复查的5个词/词块</label><textarea id="review-words">${escapeHtml(t.reviewWords)}</textarea></div><div class="field"><label>今天比冷启动更清楚的内容</label><textarea id="reflection">${escapeHtml(t.reflection)}</textarea></div></div><button class="primary-btn" id="complete-transfer">完成 ${escapeHtml(C.lessonLabel)}</button>`;
   screen.innerHTML = paper('迁移与退出检测', '课堂记录会自动形成下一次复习队列。', `<div class="paper-body">${body}</div>`, '最后一步');
@@ -335,11 +338,26 @@ function renderTransfer() {
   document.getElementById('review-words').addEventListener('input', ev => { t.reviewWords = ev.target.value; saveState(); });
   document.getElementById('reflection').addEventListener('input', ev => { t.reflection = ev.target.value; saveState(); });
   document.getElementById('transfer-timer').addEventListener('click', () => startCountdown(30, document.getElementById('transfer-display')));
-  document.getElementById('complete-transfer').addEventListener('click', async () => { const keys = await listRecordingKeys(); if (!t.plan.trim() || !t.reviewWords.trim() || !t.reflection.trim() || !keys.includes(`${RECORD_PREFIX}transfer-final`)) return toast('请完成迁移录音和退出记录'); state.completed.transfer = true; logEvent('lesson_completed'); saveState(`${C.lessonLabel} 已完成`); appMode = 'teacher'; document.getElementById('mode-toggle').textContent = '返回学生端'; navigate('dashboard'); });
+  document.getElementById('complete-transfer').addEventListener('click', async () => { const keys = await listRecordingKeys(); if (!t.plan.trim() || !t.reviewWords.trim() || !t.reflection.trim() || !keys.includes(`${RECORD_PREFIX}transfer-final`)) return toast('请完成迁移录音和退出记录'); state.completed.transfer = true; logEvent('lesson_completed'); saveState(`${C.lessonLabel} 已完成`); renderTransfer(); });
+}
+
+function renderCompletion() {
+  titleEl.textContent = '课程完成';
+  const body = `<div class="completion-panel">
+    <div class="completion-mark" aria-hidden="true">✓</div>
+    <h3>${escapeHtml(C.lessonLabel)} 已完成</h3>
+    <p>本课文字、选择和录音均已保存在当前浏览器。完成下面两步，即可保存本次学习成果。</p>
+    <div class="completion-steps">
+      <button class="completion-step" id="completion-export"><span>1</span><strong>导出学习记录</strong><small>保存本课 JSON 记录</small></button>
+      <button class="completion-step" id="completion-report"><span>2</span><strong>生成打卡图</strong><small>预览并保存 PNG 图片</small></button>
+    </div>
+  </div>`;
+  screen.innerHTML = paper('完成本课', '学习成果保存在本机，请导出记录并生成打卡图。', `<div class="paper-body">${body}</div>`, '100%');
+  document.getElementById('completion-export').addEventListener('click', exportState);
+  document.getElementById('completion-report').addEventListener('click', showCheckinReport);
 }
 
 function renderDashboard() {
-  if (appMode !== 'teacher') { navigate('home'); return; }
   const review = C.vocab.filter(x => { const v = state.vocab.items[x.id]; return v?.collected || (v?.status && v.status !== 'M'); });
   const repeatScores = C.repeat.map(x => state.repeat.items[x.id]?.score).filter(x => x !== undefined);
   const firstCorrect = C.examQuestions.filter((q, i) => Number(state.exam.answers[i]) === q.answer).length;
@@ -485,7 +503,7 @@ async function resetAll() {
   if (!confirm(`确定清空 ${C.lessonLabel} 的文字记录和全部录音吗？此操作无法撤销。`)) return;
   localStorage.removeItem(STORAGE_KEY);
   await clearLessonRecordings();
-  state = defaultState(); appMode = 'student'; render(); toast('本课数据已清空');
+  state = defaultState(); render(); toast('本课数据已清空');
 }
 
 function downloadBlob(blob, name) { const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1000); }
@@ -519,7 +537,6 @@ async function populateDashboardRecordings() {
   for (const key of keys) { const data = await getRecording(key); const url = URL.createObjectURL(data.blob); const row = document.createElement('div'); row.className = 'recording-row'; row.innerHTML = `<strong>${escapeHtml(key.replace(RECORD_PREFIX, ''))}</strong><audio controls src="${url}"></audio><button class="small-btn">下载</button>`; row.querySelector('button').addEventListener('click', () => downloadBlob(data.blob, `${key.replace(':', '-')}.webm`)); box.appendChild(row); }
 }
 
-document.getElementById('mode-toggle').addEventListener('click', () => { appMode = appMode === 'student' ? 'teacher' : 'student'; document.getElementById('mode-toggle').textContent = appMode === 'student' ? '切换教师端' : '返回学生端'; if (appMode === 'teacher') state.activeScreen = 'dashboard'; else if (state.activeScreen === 'dashboard') state.activeScreen = 'home'; render(); });
 document.getElementById('export-btn').addEventListener('click', exportState);
 document.getElementById('report-btn')?.addEventListener('click', showCheckinReport);
 document.getElementById('mobile-menu').addEventListener('click', () => document.querySelector('.sidebar').classList.toggle('open'));
