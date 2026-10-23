@@ -17,6 +17,10 @@ header p { margin: 0; color: var(--muted); font-size: 18px; line-height: 1.7; }
 .lesson-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-top: 52px; }
 .lesson-card { min-height: 310px; display: flex; flex-direction: column; padding: 28px; border: 1px solid var(--line); border-radius: 18px; background: rgba(255,255,255,.9); box-shadow: 0 18px 44px rgba(22,54,83,.08); }
 .lesson-card.featured { border-top: 5px solid var(--teal); padding-top: 24px; }
+.lesson-card.speed-card { border-top-color: #c98513; background: linear-gradient(145deg, #fff 55%, #fff5db); }
+.lesson-card.speed-card .number { color: #a96c08; }
+.lesson-card.speed-card a { background: #a96c08; }
+.lesson-card.speed-card a:hover { background: #805106; }
 .number { color: var(--teal); font-size: 12px; font-weight: 800; letter-spacing: .12em; }
 h2 { margin: 28px 0 12px; color: var(--navy); font-size: 25px; }
 .lesson-card p { margin: 0; color: var(--muted); line-height: 1.65; }

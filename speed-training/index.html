@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#163653">
+  <title>Zhcw 双速度训练</title>
+  <link rel="stylesheet" href="styles.css?v=20261022">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <div class="brand">
+        <span class="brand-mark">Z</span>
+        <div><strong>双速度训练</strong><small>Audio × Text</small></div>
+      </div>
+      <nav id="lesson-nav" aria-label="双速度课程"></nav>
+      <div class="side-actions">
+        <button class="ghost" id="results-btn">查看训练结果</button>
+        <button class="ghost" id="export-btn">导出学习记录</button>
+        <button class="ghost" id="report-btn">生成打卡图</button>
+        <a class="home-link" href="../">← 返回课程首页</a>
+      </div>
+    </aside>
+
+    <main class="main">
+      <button class="menu-btn" id="menu-btn" aria-label="打开课程菜单">☰</button>
+      <section id="view"></section>
+    </main>
+  </div>
+
+  <dialog id="report-modal" class="report-modal">
+    <button class="modal-close" aria-label="关闭">×</button>
+    <h2>学习打卡图</h2>
+    <p>保存图片后即可分享本次训练记录。</p>
+    <img class="report-preview" alt="双速度训练打卡图预览">
+    <button class="primary" id="download-report">下载打卡图</button>
+  </dialog>
+
+  <template id="record-template">
+    <div class="recorder" data-recording-key="">
+      <button class="record-btn" type="button">● 开始口述</button>
+      <span class="record-status">尚未录音</span>
+      <audio class="record-playback" controls hidden></audio>
+    </div>
+  </template>
+
+  <script src="data.js?v=20261022"></script>
+  <script src="app.js?v=20261022"></script>
+</body>
+</html>
